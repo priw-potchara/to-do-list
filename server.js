@@ -3,8 +3,8 @@ const express = require('express');
 const app = express()
 const bodyParser = require('body-parser')
 
-const routeToDoListGroup = require('./to-do-list-group');
-const routeToDoList = require('./to-do-list');
+const routeToDoListGroup = require('./routes/to-do-list-group');
+const routeToDoList = require('./routes/to-do-list');
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json())

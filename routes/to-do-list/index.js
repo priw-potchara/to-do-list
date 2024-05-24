@@ -1,15 +1,16 @@
-const { toDoListGroup } = require("../db")
+const { toDoList } = require("../../db")
 
-const routeToDoListGroup = (app) => {
-    const group = "to-do-list-group"
-    app.post(`/${group}`, createToDoListGroup)
-    app.put(`/${group}`, updateToDoListGroup)
-    app.delete(`/${group}/:id`, deleteToDoListGroup)
-    app.get(`/${group}/list`, getListToDoListGroup)
-    app.get(`/${group}/by-id/:id`, getToDoListGroupById)
+const routeToDoList = (app) => {
+    const group = "to-do-list"
+    app.post(`/${group}`, createToDoList)
+    app.put(`/${group}`, updateToDoList)
+    app.delete(`/${group}/:id`, deleteToDoList)
+    app.get(`/${group}/list`, getListToDoList)
+    app.get(`/${group}/by-id/:id`, getToDoListById)
+    app.get(`/${group}/list/by-to-do-list-group-id/:id`, getListToDoListByToDoListGroupId)
 }
 
-const createToDoListGroup = (req, res) => {
+const createToDoList = (req, res) => {
     try {
         let body = { ...req?.body };
         // ========== ========== ========== ==========
@@ -23,7 +24,7 @@ const createToDoListGroup = (req, res) => {
             return;
         }
         // ========== ========== ========== ==========
-        let model = toDoListGroup.find(x => x.display_name == body.display_name);
+        let model = toDoList.find(x => x.display_name == body.display_name);
         if (model) {
             res.json({
                 "code": 400,
@@ -35,10 +36,13 @@ const createToDoListGroup = (req, res) => {
         }
         // ========== ========== ========== ==========
         let detail = {
-            "to_do_list_group_id": toDoListGroup.length + 1,
+            "to_do_list_id": toDoList.length + 1,
             "display_name": body.display_name,
+            "created_at": new Date(),
+            "is_done": false,
+            "to_do_list_group_id": body.to_do_list_group_id || null,
         }
-        toDoListGroup.push(detail)
+        toDoList.push(detail)
         res.json({
             "code": 200,
             "success": true,
@@ -56,15 +60,15 @@ const createToDoListGroup = (req, res) => {
     }
 }
 
-const updateToDoListGroup = (req, res) => {
+const updateToDoList = (req, res) => {
     try {
         let body = { ...req?.body };
         // ========== ========== ========== ==========
-        if (!body.to_do_list_group_id) {
+        if (!body.to_do_list_id) {
             res.json({
                 "code": 400,
                 "success": false,
-                "message": "to_do_list_group_id is not empty.",
+                "message": "to_do_list_id is not empty.",
                 "data": null,
             })
             return;
@@ -80,33 +84,23 @@ const updateToDoListGroup = (req, res) => {
             return;
         }
         // ========== ========== ========== ==========
-        const index = toDoListGroup.findIndex(x => x.to_do_list_group_id == body.to_do_list_group_id);
+        const index = toDoList.findIndex(x => x.to_do_list_id == body.to_do_list_id);
         if (index < 0) {
             res.json({
                 "code": 400,
                 "success": false,
-                "message": "to do list group not found.",
+                "message": "to do list not found.",
                 "data": null,
             })
-        }
-        // ========== ========== ========== ==========
-        const model = toDoListGroup.find(x => x.to_do_list_group_id != body.to_do_list_group_id
-            && x.display_name == body.display_name);
-        if (model) {
-            res.json({
-                "code": 400,
-                "success": false,
-                "message": "display_name is duplicate.",
-                "data": null,
-            })
-            return;
         }
         // ========== ========== ========== ==========
         let detail = {
-            ...toDoListGroup[index],
+            ...toDoList[index],
             "display_name": body.display_name,
+            "is_done": body.is_done || false,
+            "to_do_list_group_id": body.to_do_list_group_id || null,
         }
-        toDoListGroup[index] = detail;
+        toDoList[index] = detail;
         res.json({
             "code": 200,
             "success": true,
@@ -124,7 +118,7 @@ const updateToDoListGroup = (req, res) => {
     }
 }
 
-const deleteToDoListGroup = (req, res) => {
+const deleteToDoList = (req, res) => {
     try {
         const id = req?.params?.id;
         // ========== ========== ========== ==========
@@ -138,9 +132,9 @@ const deleteToDoListGroup = (req, res) => {
             return;
         }
         // ========== ========== ========== ==========
-        const index = toDoListGroup.findIndex(x => x.to_do_list_group_id == id);
+        const index = toDoList.findIndex(x => x.to_do_list_id == id);
         if (index >= 0) {
-            toDoListGroup.splice(index, 1);
+            toDoList.splice(index, 1);
             res.json({
                 "code": 200,
                 "success": true,
@@ -151,7 +145,7 @@ const deleteToDoListGroup = (req, res) => {
             res.json({
                 "code": 400,
                 "success": false,
-                "message": "to do list group not found.",
+                "message": "to do list not found.",
                 "data": null,
             })
         }
@@ -166,13 +160,13 @@ const deleteToDoListGroup = (req, res) => {
     }
 }
 
-const getListToDoListGroup = (req, res) => {
+const getListToDoList = (req, res) => {
     try {
         res.json({
             "code": 200,
             "success": true,
             "message": "get list success.",
-            "data": toDoListGroup,
+            "data": toDoList,
         })
     } catch (err) {
         console.log(err)
@@ -185,7 +179,7 @@ const getListToDoListGroup = (req, res) => {
     }
 }
 
-const getToDoListGroupById = (req, res) => {
+const getToDoListById = (req, res) => {
     try {
         const id = req?.params?.id;
         // ========== ========== ========== ==========
@@ -199,19 +193,19 @@ const getToDoListGroupById = (req, res) => {
             return;
         }
         // ========== ========== ========== ==========
-        const index = toDoListGroup.findIndex(x => x.to_do_list_group_id == id);
+        const index = toDoList.findIndex(x => x.to_do_list_id == id);
         if (index >= 0) {
             res.json({
                 "code": 200,
                 "success": true,
                 "message": "get success.",
-                "data": toDoListGroup[index],
+                "data": toDoList[index],
             })
         } else {
             res.json({
                 "code": 400,
                 "success": false,
-                "message": "to do list group not found.",
+                "message": "to do list not found.",
                 "data": null,
             })
         }
@@ -226,4 +220,36 @@ const getToDoListGroupById = (req, res) => {
     }
 }
 
-module.exports = routeToDoListGroup;
+const getListToDoListByToDoListGroupId = (req, res) => {
+    try {
+        const id = req?.params?.id;
+        // ========== ========== ========== ==========
+        if (!id) {
+            res.json({
+                "code": 400,
+                "success": false,
+                "message": "id is not empty.",
+                "data": null,
+            })
+            return;
+        }
+        // ========== ========== ========== ==========
+        const list = toDoList.filter(x => x.to_do_list_group_id == id);
+        res.json({
+            "code": 200,
+            "success": true,
+            "message": "get success.",
+            "data": list,
+        })
+    } catch (err) {
+        console.log(err)
+        res.json({
+            "code": 400,
+            "success": false,
+            "message": "error.",
+            "data": detail,
+        })
+    }
+}
+
+module.exports = routeToDoList;
