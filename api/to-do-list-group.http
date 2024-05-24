@@ -1,0 +1,24 @@
+GET http://localhost:3000/to-do-list-group/list
+
+###
+GET http://localhost:3000/to-do-list-group/by-id/1
+
+###
+POST http://localhost:3000/to-do-list-group
+Content-Type: application/json
+
+{
+  "display_name": "Shopping"
+}
+
+###
+PUT http://localhost:3000/to-do-list-group
+Content-Type: application/json
+
+{
+  "to_do_list_group_id": 1,
+  "display_name": "Workout"
+}
+
+###
+DELETE  http://localhost:3000/to-do-list-group/1
