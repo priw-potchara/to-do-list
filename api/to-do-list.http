@@ -1,0 +1,31 @@
+GET http://localhost:3000/to-do-list/list
+
+###
+GET http://localhost:3000/to-do-list/by-id/1
+
+###
+GET http://localhost:3000/to-do-list/list/by-to-do-list-group-id/1
+
+###
+POST http://localhost:3000/to-do-list
+Content-Type: application/json
+
+{
+    "display_name": "To do list API - Delete",
+    "is_done": false,
+    "to_do_list_group_id": 1
+}
+
+###
+PUT http://localhost:3000/to-do-list
+Content-Type: application/json
+
+{
+  "to_do_list_id": 2,
+  "display_name": "To do list API - Get",
+  "is_done": false,
+  "to_do_list_group_id": 1
+}
+
+###
+DELETE  http://localhost:3000/to-do-list/1
